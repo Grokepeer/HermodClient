@@ -15,7 +15,7 @@ fn main() {
 
     let mut test: (f64, usize) = (0.0, 0);
 
-    let testlen = 100000;
+    let testlen = 100000; //
 
     for i in 1..testlen {
         let cmd = format!("get _base from _basedb\n");
