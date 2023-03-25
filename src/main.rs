@@ -19,7 +19,8 @@ fn main() {
 
     let mut test: (f64, usize) = (0.0, 0);
 
-    let testlen = 800000;
+    let testlen = 40000;
+    let persymbol = (testlen / 100, testlen / 100 - 1);
 
     let timestart = Instant::now();
     println!("Starting to write test data to DB now...");
@@ -32,7 +33,7 @@ fn main() {
         let mut read = [0; 128];
         stream.read(&mut read);
         
-        if i % 8000 == 7999 {
+        if i % persymbol.0 == persymbol.1 {
             print!("=");
             io::stdout().flush().unwrap();
         }
@@ -59,7 +60,7 @@ fn main() {
                 output.write(out.as_bytes());
             }
 
-            if i % 8000 == 7999 {
+            if i % persymbol.0 == persymbol.1 {
                 print!("=");
                 io::stdout().flush().unwrap();
             }
