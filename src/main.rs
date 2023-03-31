@@ -12,18 +12,18 @@ fn main() {
     let mut stream = TcpStream::connect("127.0.0.1:2088").unwrap();
     let mut buffer = BufReader::new(stream.try_clone().unwrap());
     let mut output = File::create("./output.dat").unwrap();
-
+    
     let mut read = [0; 128];
     stream.read(&mut read);
+    println!("Starting to write test data to DB now...");
     println!("{}", str::from_utf8(&read).unwrap().trim_matches(char::from(0)));
 
     let mut test: (f64, usize) = (0.0, 0);
 
-    let testlen = 40000;
+    let testlen = 50000;
     let persymbol = (testlen / 100, testlen / 100 - 1);
 
     let timestart = Instant::now();
-    println!("Starting to write test data to DB now...");
 
     print!("<");
     io::stdout().flush().unwrap();
