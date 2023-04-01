@@ -20,7 +20,7 @@ fn main() {
 
     let mut test: (f64, usize) = (0.0, 0);
 
-    let testlen = 50000;
+    let testlen = 100000;
     let persymbol = (testlen / 100, testlen / 100 - 1);
 
     let timestart = Instant::now();
@@ -51,12 +51,16 @@ fn main() {
         stream.write(cmd.as_bytes());
         let mut read = [0; 128];
         stream.read(&mut read);
+        let mut read2 = [0; 40];
+        stream.read(&mut read2);
         
         if i % 5 == 4 {
             let res = str::from_utf8(&read).unwrap_or("-").trim_matches(char::from(0));
-            if res.len() >= 14 {
-                test = (&res[1..13].trim().parse::<f64>().unwrap_or(0.0) + test.0, test.1 + 1);
-                let out = format!("{:8?}{}{}{}", i, "\t", &res[1..13].trim(), "\n");
+            let res2 = str::from_utf8(&read2).unwrap_or("-").trim_matches(char::from(0));
+            // println!("L: {}; {}", res, &res2[1..13]);
+            if res2.len() >= 19 {
+                test = (&res2[1..13].trim().parse::<f64>().unwrap_or(0.0) + test.0, test.1 + 1);
+                let out = format!("{:8?}{}{}{}", i, "\t", &res2[1..13].trim(), "\n");
                 output.write(out.as_bytes());
             }
 
