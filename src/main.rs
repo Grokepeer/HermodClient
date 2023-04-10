@@ -1,6 +1,8 @@
 use std::{
     str,
-    ops::Rem,
+    thread,
+    time,
+    // ops::Rem,
     fs::File,
     time::Instant,
     io,
@@ -9,18 +11,32 @@ use std::{
 };
 
 fn main() {
+    print!("{esc}[2J{esc}[1;1H", esc = 27 as char); //Reset terminal
     let mut stream = TcpStream::connect("127.0.0.1:2088").unwrap();
-    let mut buffer = BufReader::new(stream.try_clone().unwrap());
-    let mut output = File::create("./output.dat").unwrap();
+    // let mut buffer = BufReader::new(stream.try_clone().unwrap());
     
     let mut read = [0; 128];
     stream.read(&mut read);
-    println!("Starting to write test data to DB now...");
+    println!("Welcome to Hermod. The Client is starting so hang thight!");
     println!("{}", str::from_utf8(&read).unwrap().trim_matches(char::from(0)));
+    thread::sleep(time::Duration::from_millis(2000));
+    
+    loop {
+        print!("{esc}[2J{esc}[1;1H", esc = 27 as char); //Reset terminal
+        println!("So... What do you need?");
 
+        let stdin = io::stdin();
+        let mut name = String::new();
+        stdin.read_line(&mut name);
+        thread::sleep(time::Duration::from_millis(500));
+    }
+}
+
+fn test(mut stream: &TcpStream) {
+    let mut output = File::create("./output.dat").unwrap();
     let mut test: (f64, usize) = (0.0, 0);
 
-    let testlen = 10000;
+    let testlen = 1000000;
     let persymbol = (testlen / 100, testlen / 100 - 1);
 
     let timestart = Instant::now();
@@ -51,29 +67,29 @@ fn main() {
         stream.write(cmd.as_bytes());
         let ts = Instant::now();
         // println!("Waiting on response...");
-        let mut read = Vec::new();
-        stream.read_to_end(&mut read);
+        let mut read = [0; 128];
+        stream.read(&mut read);
         // println!("Read1: {:?}", read);
         // let mut read2 = Vec::new();
         // stream.read_to_end(&mut read2);
         // println!("Read2: {:?}", read2);
-        println!("Time: {:?}", ts.elapsed());
+        // println!("Time: {:?}, Read: {:?}", ts.elapsed(), read);
         
-        // if i % 5 == 4 {
-        //     let res = str::from_utf8(&read).unwrap_or("-").trim_matches(char::from(0));
-        //     let res2 = str::from_utf8(&read2).unwrap_or("-").trim_matches(char::from(0));
-        //     // println!("L: {}; {}", res, &res2);
-        //     if res2.len() >= 19 {
-        //         test = (&res2[1..13].trim().parse::<f64>().unwrap_or(0.0) + test.0, test.1 + 1);
-        //         let out = format!("{:8?}{}{}{}", i, "\t", &res2[1..13].trim(), "\n");
-        //         output.write(out.as_bytes());
-        //     }
+        if i % 5 == 4 {
+            // let res = str::from_utf8(&read).unwrap_or("-").trim_matches(char::from(0));
+            // let res2 = str::from_utf8(&read2).unwrap_or("-").trim_matches(char::from(0));
+            // println!("L: {}; {}", res, &res2);
+            // if res2.len() >= 19 {
+            //     test = (&res2[1..13].trim().parse::<f64>().unwrap_or(0.0) + test.0, test.1 + 1);
+            //     let out = format!("{:8?}{}{}{}", i, "\t", &res2[1..13].trim(), "\n");
+            //     output.write(out.as_bytes());
+            // }
 
-        //     if i % persymbol.0 == persymbol.1 {
-        //         print!("=");
-        //         io::stdout().flush().unwrap();
-        //     }
-        // }
+            if i % persymbol.0 == persymbol.1 {
+                print!("=");
+                io::stdout().flush().unwrap();
+            }
+        }
     }
     print!(">");
     io::stdout().flush().unwrap();
