@@ -31,24 +31,29 @@ fn main() {
     
     loop {
         // print!("{esc}[2J{esc}[1;1H", esc = 27 as char); //Reset terminal
-        println!("So... What do you need?");
+        // println!("So... What do you need?");
         print!("> ");
         io::stdout().flush().unwrap();
 
         let mut cmd = String::new();
         stdin.read_line(&mut cmd);
 
-        stream.write(cmd.as_bytes());
+        // println!("{:?}", cln);
+        stream.write(format!("{}\n", &cmd[..cmd.len() - 2]).as_bytes());
         
-        let mut read = [0; 64];
+        let mut response = String::new();
         loop {
+            let mut read = [0; 128];
             let readlen = stream.read(&mut read).unwrap();
             
-            println!("Read: {:?}", str::from_utf8(&read).unwrap().trim());
+            let readutf8 = str::from_utf8(&read).unwrap().trim();
+            response.push_str(readutf8);
+            // println!("Read: {}", readutf8);
             if read[readlen - 1] == 4 {
                 break;
             }
         }
+        println!("Response: {}", response);
     }
 }
 
