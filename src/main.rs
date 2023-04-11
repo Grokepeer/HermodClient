@@ -12,23 +12,43 @@ use std::{
 
 fn main() {
     print!("{esc}[2J{esc}[1;1H", esc = 27 as char); //Reset terminal
-    let mut stream = TcpStream::connect("127.0.0.1:2088").unwrap();
     // let mut buffer = BufReader::new(stream.try_clone().unwrap());
     
+    println!("Welcome to Hermod. The Client is starting so hang thight!");
+    
+    let mut stream = match TcpStream::connect("127.0.0.1:2088") {
+        Ok(connection) => connection,
+        Err(_) => {
+            println!("Connection refused on port 2088");
+            return
+        }
+    };
     let mut read = [0; 128];
     stream.read(&mut read);
-    println!("Welcome to Hermod. The Client is starting so hang thight!");
     println!("{}", str::from_utf8(&read).unwrap().trim_matches(char::from(0)));
-    thread::sleep(time::Duration::from_millis(2000));
+    
+    let stdin = io::stdin();
     
     loop {
-        print!("{esc}[2J{esc}[1;1H", esc = 27 as char); //Reset terminal
+        // print!("{esc}[2J{esc}[1;1H", esc = 27 as char); //Reset terminal
         println!("So... What do you need?");
+        print!("> ");
+        io::stdout().flush().unwrap();
 
-        let stdin = io::stdin();
-        let mut name = String::new();
-        stdin.read_line(&mut name);
-        thread::sleep(time::Duration::from_millis(500));
+        let mut cmd = String::new();
+        stdin.read_line(&mut cmd);
+
+        stream.write(cmd.as_bytes());
+        
+        let mut read = [0; 64];
+        loop {
+            let readlen = stream.read(&mut read).unwrap();
+            
+            println!("Read: {:?}", str::from_utf8(&read).unwrap().trim());
+            if read[readlen - 1] == 4 {
+                break;
+            }
+        }
     }
 }
 
