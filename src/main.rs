@@ -23,6 +23,11 @@ fn main() {
             return
         }
     };
+
+    //Sending deltoken to the DB host for authentication
+    let tmptoken = "Ybd.";
+    stream.write(format!("auth: {}\n", tmptoken).as_bytes());
+
     let mut read = [0; 128];
     stream.read(&mut read);
     println!("{}", str::from_utf8(&read).unwrap().trim_matches(char::from(0)));
@@ -39,9 +44,10 @@ fn main() {
         stdin.read_line(&mut cmd);
 
         // println!("{:?}", cln);
-        stream.write(format!("{}\n", &cmd[..cmd.len() - 2]).as_bytes());
+        stream.write(format!("{}\n", &cmd[..cmd.len() - 1]).as_bytes());
         
         let mut response = String::new();
+        let mut totallen = 0;
         loop {
             let mut read = [0; 128];
             let readlen = stream.read(&mut read).unwrap();
@@ -50,10 +56,12 @@ fn main() {
             response.push_str(readutf8);
             // println!("Read: {}", readutf8);
             if read[readlen - 1] == 4 {
+                totallen += readlen;
                 break;
             }
+            totallen += 128;
         }
-        println!("Response: {}", response);
+        println!("Response: {}\nQET: {}ns\nCODE: {}", &response[..totallen - 19], &response[totallen - 18..totallen - 6].trim(), &response[totallen - 5..totallen - 2]);
     }
 }
 
