@@ -25,7 +25,7 @@ fn main() {
     };
 
     //Sending deltoken to the DB host for authentication
-    let tmptoken = "Ybd.";
+    let tmptoken = "Ybd.08";
     stream.write(format!("auth: {}\n", tmptoken).as_bytes());
 
     let mut read = [0; 128];
