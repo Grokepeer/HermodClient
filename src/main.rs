@@ -43,8 +43,8 @@ fn main() {
         let mut cmd = String::new();
         stdin.read_line(&mut cmd);
 
-        // println!("{:?}", cln);
-        stream.write(format!("{}\n", &cmd[..cmd.len() - 1]).as_bytes());
+        stream.write(format!("{}\u{4}", &cmd[..cmd.len() - 1]).as_bytes());
+        println!("{:?}", format!("{}", &cmd[..cmd.len() - 1]));
         
         let mut response = String::new();
         let mut totallen = 0;
