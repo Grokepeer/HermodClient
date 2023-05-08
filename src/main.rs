@@ -1,16 +1,14 @@
 use std::{
     str,
-    thread,
-    time,
-    // ops::Rem,
-    fs::File,
-    time::Instant,
+    // fs::File,
+    // time::Instant,
     io,
-    io::{prelude::*, BufReader, Write},
+    io::{prelude::*, Write},
     net::TcpStream
 };
 
 fn main() {
+    let apiv = "v0.3.";
     print!("{esc}[2J{esc}[1;1H", esc = 27 as char); //Reset terminal
     // let mut buffer = BufReader::new(stream.try_clone().unwrap());
     
@@ -26,25 +24,50 @@ fn main() {
 
     //Sending deltoken to the DB host for authentication
     let tmptoken = "Ybd.08";
-    stream.write(format!("auth: {}\n", tmptoken).as_bytes());
+    match stream.write(format!("auth: {}\n", tmptoken).as_bytes()) {
+        Err(_) => {
+            println!("Couldn't send authentication to the Host. Make sure the Host is running and reachable.");
+            return
+        },
+        _ => {}
+    };
 
     let mut read = [0; 128];
-    stream.read(&mut read);
-    println!("{}", str::from_utf8(&read).unwrap().trim_matches(char::from(0)));
+    stream.read(&mut read).unwrap();
+    let welmsg = str::from_utf8(&read).unwrap().trim_matches(char::from(0));
+    let detailinit = welmsg.find("(").unwrap();
+    if &welmsg[detailinit + 9..detailinit + 14] != apiv {
+        println!("Host API version mismatch. Update the Client or the Host to match the major API version. (Client API {}x | Host API {})", apiv, &welmsg[detailinit + 9..detailinit + 15]);
+        stream.write("ext".as_bytes()).unwrap();
+        return
+    }
+    println!("{}", welmsg);
     
     let stdin = io::stdin();
     
     loop {
-        // print!("{esc}[2J{esc}[1;1H", esc = 27 as char); //Reset terminal
-        // println!("So... What do you need?");
         print!("> ");
         io::stdout().flush().unwrap();
 
         let mut cmd = String::new();
-        stdin.read_line(&mut cmd);
+        stdin.read_line(&mut cmd).unwrap();
 
-        stream.write(format!("{}\u{4}", &cmd[..cmd.len() - 1]).as_bytes());
-        println!("{:?}", format!("{}", &cmd[..cmd.len() - 1]));
+        // Checks if the user called for exit or quit
+        if &cmd[..cmd.len() - 1] == "exit" || &cmd[..cmd.len() - 1] == "quit" || &cmd[..cmd.len() - 1] == "ext" {
+            stream.write("ext".as_bytes()).unwrap();
+            println!("Connection to Host dropped");
+            return
+        }
+
+        match stream.write(format!("{}\u{4}", &cmd[..cmd.len() - 1]).as_bytes()) {
+            Err(_) => {
+                println!("Couldn't send data to the Host. Make sure the Host is running and reachable.");
+                return
+            },
+            _ => {}
+        };
+
+        // println!("{:?}", format!("{}", &cmd[..cmd.len() - 1]));
         
         let mut response = String::new();
         let mut totallen = 0;
@@ -55,7 +78,7 @@ fn main() {
             let readutf8 = str::from_utf8(&read).unwrap().trim();
             response.push_str(readutf8);
             // println!("Read: {}", readutf8);
-            if read[readlen - 1] == 4 {
+            if readlen <= 0 || read[readlen - 1] == 4 {
                 totallen += readlen;
                 break;
             }
@@ -65,9 +88,9 @@ fn main() {
     }
 }
 
-fn test(mut stream: &TcpStream) {
-    let mut output = File::create("./output.dat").unwrap();
-    let mut test: (f64, usize) = (0.0, 0);
+/*fn test(mut stream: &TcpStream) {
+    // let mut output = File::create("./output.dat").unwrap();
+    let test: (f64, usize) = (0.0, 0);
 
     let testlen = 1000000;
     let persymbol = (testlen / 100, testlen / 100 - 1);
@@ -78,9 +101,9 @@ fn test(mut stream: &TcpStream) {
     io::stdout().flush().unwrap();
     for i in 1..testlen {
         let cmd = format!("set {i} in _basedb to testing\n");
-        stream.write(cmd.as_bytes());
+        stream.write(cmd.as_bytes()).unwrap();
         let mut read = [0; 128];
-        stream.read(&mut read);
+        stream.read(&mut read).unwrap();
         
         if i % persymbol.0 == persymbol.1 {
             print!("=");
@@ -97,8 +120,8 @@ fn test(mut stream: &TcpStream) {
     io::stdout().flush().unwrap();
     for i in 1..testlen {
         let cmd = format!("get {i} from _basedb\n");
-        stream.write(cmd.as_bytes());
-        let ts = Instant::now();
+        stream.write(cmd.as_bytes()).unwrap();
+        // let ts = Instant::now();
         // println!("Waiting on response...");
         let mut read = [0; 128];
         stream.read(&mut read);
@@ -129,4 +152,4 @@ fn test(mut stream: &TcpStream) {
 
     println!("\nCompleted reading in {} seconds", timestart.elapsed().as_secs());
     println!("AVG query processing time: {:.2?} nano seconds", test.0 / test.1 as f64);
-}
+}*/
