@@ -3,5 +3,5 @@
 version = 3
 
 [[package]]
-name = "HermodClient"
+name = "hermodclient"
 version = "0.1.0"
