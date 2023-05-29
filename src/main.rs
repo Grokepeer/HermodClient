@@ -43,7 +43,6 @@ fn main() {
         let mut cmd = String::new();
         stdin.read_line(&mut cmd);
 
-        // println!("{:?}", cln);
         stream.write(format!("{}\n", &cmd[..cmd.len() - 1]).as_bytes());
         
         let mut response = String::new();
