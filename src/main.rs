@@ -12,7 +12,7 @@ use std::{
 };
 
 fn main() {
-    let apiv = "v0.3.";
+    let apiv = "v0.3."; //Nothing fun
     print!("{esc}[2J{esc}[1;1H", esc = 27 as char); //Reset terminal
     // let mut buffer = BufReader::new(stream.try_clone().unwrap());
     
