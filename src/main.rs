@@ -12,7 +12,7 @@ use std::{
 };
 
 fn main() {
-    let apiv = "v0.3.";
+    let apiv = "v0.3."; //API version
     print!("{esc}[2J{esc}[1;1H", esc = 27 as char); //Reset terminal
     // let mut buffer = BufReader::new(stream.try_clone().unwrap());
     
@@ -27,7 +27,7 @@ fn main() {
     };
 
     //Sending deltoken to the DB host for authentication
-    let tmptoken = "Ybd.08";
+    let tmptoken = "testing";
     match stream.write(format!("auth: {}\n", tmptoken).as_bytes()) {
         Err(_) => {
             println!("Couldn't send authentication to the Host. Make sure the Host is running and reachable.");
@@ -88,7 +88,8 @@ fn main() {
             }
             totallen += 128;
         }
-        println!("Response: {}\nQET: {}ns\nCODE: {}", &response[..totallen - 19], &response[totallen - 18..totallen - 6].trim(), &response[totallen - 5..totallen - 2]);
+        println!("{}", response);
+        // println!("Response: {}\nQET: {}ns\nCODE: {}", &response[..totallen - 19], &response[totallen - 18..totallen - 6].trim(), &response[totallen - 5..totallen - 2]);
     }
 }
 
