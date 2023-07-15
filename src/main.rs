@@ -26,9 +26,21 @@ fn main() {
         }
     };
 
+    let stdin = io::stdin();
+
+    println!("What Token to use?");
+    print!("> ");
+    io::stdout().flush().unwrap();
+    let mut iotoken = String::new();
+    stdin.read_line(&mut iotoken).unwrap();
+
+    //If no token was typed then the Client will send the default token to the Host
+    if iotoken.len() < 1 {
+        iotoken = "token\n".to_string();
+    }
+
     //Sending deltoken to the DB host for authentication
-    let tmptoken = "testing";
-    match stream.write(format!("auth: {}\n", tmptoken).as_bytes()) {
+    match stream.write(format!("auth: {}\n", &iotoken[..iotoken.len() - 1]).as_bytes()) {
         Err(_) => {
             println!("Couldn't send authentication to the Host. Make sure the Host is running and reachable.");
             return
@@ -45,9 +57,9 @@ fn main() {
         stream.write("ext".as_bytes()).unwrap();
         return
     }
+    print!("{esc}[2J{esc}[1;1H", esc = 27 as char); //Reset terminal
     println!("{}", welmsg);
     
-    let stdin = io::stdin();
     
     loop {
         print!("> ");
@@ -88,8 +100,8 @@ fn main() {
             }
             totallen += 128;
         }
-        println!("{}", response);
-        // println!("Response: {}\nQET: {}ns\nCODE: {}", &response[..totallen - 19], &response[totallen - 18..totallen - 6].trim(), &response[totallen - 5..totallen - 2]);
+        // println!("{}", response);
+        println!("Response: {}\nQET: {}ns\nCODE: {}", &response[..totallen - 19], &response[totallen - 18..totallen - 6].trim(), &response[totallen - 5..totallen - 2]);
     }
 }
 
