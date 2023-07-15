@@ -35,8 +35,8 @@ fn main() {
     stdin.read_line(&mut iotoken).unwrap();
 
     //If no token was typed then the Client will send the default token to the Host
-    if iotoken.len() < 1 {
-        iotoken = "token\n".to_string();
+    if iotoken.len() < 2 {
+        iotoken = "tokenn".to_string(); //Double n at the end is necessary, do not remove
     }
 
     //Sending deltoken to the DB host for authentication
