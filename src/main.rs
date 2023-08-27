@@ -42,7 +42,7 @@ fn main() {
     }
 
     //Sending deltoken to the DB host for authentication
-    match stream.write(format!("auth: {}\n", &iotoken[..iotoken.len() - 1]).as_bytes()) {
+    match stream.write(format!("auth: {}\u{4}", &iotoken[..iotoken.len() - 1]).as_bytes()) {
         Err(_) => {
             println!("Couldn't send authentication to the Host. Make sure the Host is running and reachable.");
             return
@@ -85,8 +85,6 @@ fn main() {
             },
             _ => {}
         };
-
-        // println!("{:?}", format!("{}", &cmd[..cmd.len() - 1]));
         
         let mut bytes: Vec<u8> = Vec::new();    //Used to copy down form the TCP buffer
         let totallen = buffer.read_until(0x4, &mut bytes).unwrap();    //Reading response from Host
