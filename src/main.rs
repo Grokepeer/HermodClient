@@ -7,7 +7,7 @@ use std::{
     // fs::File,
     // time::Instant,
     io,
-    io::{prelude::*, Write},
+    io::{prelude::*, Write, BufReader},
     net::TcpStream
 };
 
@@ -25,6 +25,8 @@ fn main() {
             return
         }
     };
+    let mut buffer = BufReader::new(stream.try_clone().unwrap());
+    let mut bytes: Vec<u8> = Vec::new();    //Used to copy down form the TCP buffer
 
     let stdin = io::stdin();
 
@@ -48,9 +50,10 @@ fn main() {
         _ => {}
     };
 
-    let mut read = [0; 128];
-    stream.read(&mut read).unwrap();
-    let welmsg = str::from_utf8(&read).unwrap().trim_matches(char::from(0));
+    //Reading connection confirmation
+    buffer.read_until(0x4, &mut bytes).unwrap();
+    let welmsg = str::from_utf8(&bytes).unwrap();
+
     let detailinit = welmsg.find("(").unwrap();
     if &welmsg[detailinit + 9..detailinit + 14] != apiv {
         println!("Host API version mismatch. Update the Client or the Host to match the major API version. (Client API {}x | Host API {})", apiv, &welmsg[detailinit + 9..detailinit + 15]);
@@ -85,22 +88,10 @@ fn main() {
 
         // println!("{:?}", format!("{}", &cmd[..cmd.len() - 1]));
         
-        let mut response = String::new();
-        let mut totallen = 0;
-        loop {
-            let mut read = [0; 128];
-            let readlen = stream.read(&mut read).unwrap();
-            
-            let readutf8 = str::from_utf8(&read).unwrap().trim();
-            response.push_str(readutf8);
-            // println!("Read: {}", readutf8);
-            if readlen <= 0 || read[readlen - 1] == 4 {
-                totallen += readlen;
-                break;
-            }
-            totallen += 128;
-        }
-        // println!("{}", response);
+        let mut bytes: Vec<u8> = Vec::new();    //Used to copy down form the TCP buffer
+        let totallen = buffer.read_until(0x4, &mut bytes).unwrap();    //Reading response from Host
+        let response = str::from_utf8(&bytes).unwrap();
+
         println!("Response: {}\nQET: {}ns\nCODE: {}", &response[..totallen - 19], &response[totallen - 18..totallen - 6].trim(), &response[totallen - 5..totallen - 2]);
     }
 }
